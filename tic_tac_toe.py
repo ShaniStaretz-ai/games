@@ -2,7 +2,7 @@ def init_game(n) -> dict[str, any]:
     return {
         'board': init_board(n),
         'turn': 'X',
-        'counter': 1
+        'counter': 0
     }
 
 
@@ -25,12 +25,13 @@ def draw_board(game) -> None:
 def input_square(game):
     while True:
         location: str = input(f"enter row number,column number for {game['turn']} separated by ',':")
-        location_list =  location.split(',')
-        if len(location_list) < 2 or not all([x != '' for x in location_list]):
+        location_list = location.split(',')
+        if len(location_list) < 2 or not all([x != '' for x in location_list]) or not all(
+                [x.isdigit() for x in location_list]):
             print("try again,invalid input")
             continue
-        location_list=[int(x)-1 for x in location_list]
-        if not 0 <= location_list[0] <= len(game['board']) or not 0 <= location_list[1] <= len(game['board']):
+        location_list = [int(x) - 1 for x in location_list]
+        if not 0 <= location_list[0] < len(game['board']) or not 0 <= location_list[1] < len(game['board']):
             print("try again,out of range")
             continue
         if game['board'][location_list[0]][location_list[1]] != '_':
@@ -47,8 +48,6 @@ def set_square(game, location):
 
 
 def check_win(game):
-    # board = game['board']
-    # player = game['turn']
     return check_win_rows(game) or check_win_columns(game) or check_win_diagonals(game)
 
 
@@ -77,16 +76,17 @@ def check_win_diagonals(game):
     board = game['board']
     player = game['turn']
 
-    return all([board[i][i] == player for i in range(len(board))])
+    d1 = all([board[i][len(board) - 1 - i] == player for i in range(len(board))])
+    d2 = all([board[i][i] == player for i in range(len(board))])
+    return d1 or d2
 
 
-def check_tie():
-    pass
+def check_tie(game):
+    return game['counter'] == len(game['board']) ** 2
 
 
 def switch_player(game):
-    game['turn']='O' if game['turn']=='X' else'X'
-
+    game['turn'] = 'O' if game['turn'] == 'X' else 'X'
 
 
 def play_tic_tac_toe():
@@ -94,12 +94,14 @@ def play_tic_tac_toe():
     print(my_game)
     draw_board(my_game)
     while True:
-
         location = input_square(my_game)
         set_square(my_game, location)
         draw_board(my_game)
         if check_win(my_game):
-            print("the winner is:",my_game['turn'])
+            print("the winner is:", my_game['turn'])
+            break
+        if check_tie(my_game):
+            print("game over")
             break
         switch_player(my_game)
 
