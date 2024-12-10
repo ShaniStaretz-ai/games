@@ -2,8 +2,34 @@ def init_game(n) -> dict[str, any]:
     return {
         'board': init_board(n),
         'turn': 'X',
-        'counter': 0
+        'counter': 0,
+        'players': {},
+        "icons": ['X', 'O']
+
     }
+
+
+def get_players(game):
+    players = game['players']
+    icons = game['icons'].copy()
+    count = 1
+    while count <= 2:
+        name = input("enter your name:").capitalize()
+
+        if len(icons) > 1:
+            while True:
+                icon = input("select icon X/O:").upper()
+                if not icon in icons:
+                    print(f"invalid icon, the positions are: {'/'.join(icons)}")
+                    continue
+                break
+            icons.remove(icon)
+        else:
+            icon = icons.pop()
+        players[f'{icon}'] = name
+        count += 1
+    print(players)
+    game['players'] = players
 
 
 def init_board(n: int):
@@ -24,7 +50,8 @@ def draw_board(game) -> None:
 
 def input_square(game):
     while True:
-        location: str = input(f"enter row number,column number for {game['turn']} separated by ',':")
+        location: str = input(
+            f"enter row number,column number for {game['players'][game['turn']]}({game['turn']}) separated by ',':")
         location_list = location.split(',')
         if len(location_list) < 2 or not all([x != '' for x in location_list]) or not all(
                 [x.isdigit() for x in location_list]):
@@ -91,6 +118,7 @@ def switch_player(game):
 
 def play_tic_tac_toe():
     my_game = init_game(3)
+    get_players(my_game)
     print(my_game)
     draw_board(my_game)
     while True:
@@ -98,7 +126,7 @@ def play_tic_tac_toe():
         set_square(my_game, location)
         draw_board(my_game)
         if check_win(my_game):
-            print("the winner is:", my_game['turn'])
+            print(f"the winner is:{my_game['players'][my_game['turn']]}!")
             break
         if check_tie(my_game):
             print("game over")
