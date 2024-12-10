@@ -117,21 +117,28 @@ def switch_player(game):
 
 
 def play_tic_tac_toe():
-    my_game = init_game(3)
-    get_players(my_game)
-    print(my_game)
-    draw_board(my_game)
-    while True:
-        location = input_square(my_game)
-        set_square(my_game, location)
+    want2play = True
+    while want2play:
+        my_game = init_game(3)
+        get_players(my_game)
+        print(my_game)
         draw_board(my_game)
-        if check_win(my_game):
-            print(f"the winner is:{my_game['players'][my_game['turn']]}!")
-            break
-        if check_tie(my_game):
-            print("game over")
-            break
-        switch_player(my_game)
+        while True:
+            location = input_square(my_game)
+            set_square(my_game, location)
+            draw_board(my_game)
+            if check_win(my_game):
+                print(f"the winner is:{my_game['players'][my_game['turn']]}!")
+                break
+            if check_tie(my_game):
+                print("game over")
+                break
+            switch_player(my_game)
+        want2play = True if input("do you want to play again?(y/n)").lower() == 'y' else False
+        if want2play:
+            continue
+    else:
+        print("goodbye!")
 
 
 if __name__ == "__main__":
