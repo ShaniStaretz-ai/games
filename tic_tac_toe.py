@@ -79,10 +79,7 @@ def init_board(n: int) -> list[list[str]]:
     :param n: diameter for the game's size nxn
     :return: a nested list of string in size of nxn
     """
-    board_result: list[list[str]] = []
-    for row in range(1, n + 1):
-        board_result.append(['_'] * n)
-    return board_result
+    return [['_'] * n for row in range(1, n + 1)]
 
 
 def draw_board(game:dict[str, any]) -> None:
