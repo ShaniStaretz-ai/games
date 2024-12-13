@@ -1,3 +1,6 @@
+import random
+
+
 def init_game(n, game, is_rematch) -> dict[str, any]:
     if not is_rematch:
         return {
@@ -23,22 +26,28 @@ def get_players(game, is_rematch=False):
         players = {}
         icons = game['icons'].copy()
         count = 1
-        while count <= 2:
+        while count < 3:
             name = input(f"player #{count}, please enter your name:").capitalize()
-
             if len(icons) > 1:
-                while True:
-                    icon = input("select icon X/O:").upper()
-                    if not icon in icons:
-                        print(f"invalid icon, the positions are: {'/'.join(icons)}")
-                        continue
-                    break
+                is_select_icon = True if input("do you want to select symbol?(y/n)").lower() == 'y' else False
+                if is_select_icon:
+                    while True:
+                        icon = input("select icon X/O:").upper()
+                        if not icon in icons:
+                            print(f"invalid icon, the positions are: {'/'.join(icons)}")
+                            continue
+                        break
+                else:
+                    icon = random.choice(icons)
+
                 icons.remove(icon)
             else:
                 icon = icons.pop()
+            print(f"you will play the {icon} symbol in this game")
             players[f'{icon}'] = name
             count += 1
-    game['players'] = players
+        print(players)
+        game['players'] = players
 
 
 def init_board(n: int):
