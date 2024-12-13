@@ -1,34 +1,43 @@
-def init_game(n) -> dict[str, any]:
+def init_game(n, game, is_rematch) -> dict[str, any]:
+    if not is_rematch:
+        return {
+            'board': init_board(n),
+            'turn': 'X',
+            'counter': 0,
+            'players': {},
+            "icons": ['X', 'O']
+
+        }
     return {
         'board': init_board(n),
         'turn': 'X',
         'counter': 0,
-        'players': {},
+        'players': game['players'],
         "icons": ['X', 'O']
-
     }
 
 
-def get_players(game):
+def get_players(game, is_rematch=False):
     players = game['players']
-    icons = game['icons'].copy()
-    count = 1
-    while count <= 2:
-        name = input("enter your name:").capitalize()
+    if not is_rematch:
+        players = {}
+        icons = game['icons'].copy()
+        count = 1
+        while count <= 2:
+            name = input(f"player #{count}, please enter your name:").capitalize()
 
-        if len(icons) > 1:
-            while True:
-                icon = input("select icon X/O:").upper()
-                if not icon in icons:
-                    print(f"invalid icon, the positions are: {'/'.join(icons)}")
-                    continue
-                break
-            icons.remove(icon)
-        else:
-            icon = icons.pop()
-        players[f'{icon}'] = name
-        count += 1
-    print(players)
+            if len(icons) > 1:
+                while True:
+                    icon = input("select icon X/O:").upper()
+                    if not icon in icons:
+                        print(f"invalid icon, the positions are: {'/'.join(icons)}")
+                        continue
+                    break
+                icons.remove(icon)
+            else:
+                icon = icons.pop()
+            players[f'{icon}'] = name
+            count += 1
     game['players'] = players
 
 
@@ -117,11 +126,14 @@ def switch_player(game):
 
 
 def play_tic_tac_toe():
-    want2play = True
-    while want2play:
-        my_game = init_game(3)
-        get_players(my_game)
-        print(my_game)
+    want2play = True;
+    is_rematch = False
+    my_game: dict[str, any] = {}
+
+    while want2play or is_rematch:
+        print("Let play Tic - Tac - Toe!!")
+        my_game = init_game(3, my_game, is_rematch)
+        get_players(my_game, is_rematch)
         draw_board(my_game)
         while True:
             location = input_square(my_game)
@@ -134,9 +146,13 @@ def play_tic_tac_toe():
                 print("game over")
                 break
             switch_player(my_game)
-        want2play = True if input("do you want to play again?(y/n)").lower() == 'y' else False
+        want2play = True if input("do you want to play a new game?(y/n)").lower() == 'y' else False
         if want2play:
+            is_rematch = False
             continue
+        else:
+            is_rematch = True if input("do you want a rematch?(y/n)").lower() == 'y' else False
+
     else:
         print("goodbye!")
 
