@@ -15,7 +15,8 @@ def init_game(n: int, game: dict[str, any], is_rematch: bool) -> dict[str, any]:
             'turn': 'X',
             'players': {},
             "icons": ['X', 'O'],
-            "moves":possible_moves(n)
+            "moves":possible_moves(n),
+            "computer_mode":False
 
         }
     return {
@@ -23,7 +24,8 @@ def init_game(n: int, game: dict[str, any], is_rematch: bool) -> dict[str, any]:
         'turn': 'X',
         'players': game['players'],
         "icons": ['X', 'O'],
-        "moves": possible_moves(n)
+        "moves": possible_moves(n),
+        "computer_mode": False
     }
 
 
@@ -61,15 +63,26 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
     if not is_rematch:
         players = {}
         icons = game['icons'].copy()
-        count = 1
-        while count < 3:
-            name = input(f"player #{count}, please enter your name:").capitalize()
+        is_computer = True if input("do you want to play against the computer?(y/n)").lower() == 'y' else False
+        if not is_computer:
+            count = 1
+            while count < 3:
+                name = input(f"player #{count}, please enter your name:").capitalize()
+
+                icon = get_player_icon(icons)
+                print(f"you will play the {icon} symbol in this game")
+                players[f'{icon}'] = name
+                count += 1
+        else:
+            name = input(f"please enter your name:").capitalize()
 
             icon = get_player_icon(icons)
             print(f"you will play the {icon} symbol in this game")
             players[f'{icon}'] = name
-            count += 1
-    game['players'] = players
+            icon = get_player_icon(icons)
+            players[f'{icon}'] = 'computer'
+        game['players'] = players
+        game['computer_mode']=is_computer
 
 
 def init_board(n: int) -> list[list[str]]:
@@ -78,7 +91,6 @@ def init_board(n: int) -> list[list[str]]:
     :param n: diameter for the game's size nxn
     :return: a nested list of string in size of nxn
     """
-
     return [['_'] * n for _ in range(1, n + 1)]
 
 def possible_moves(n: int) -> set[tuple[int,int]]:
@@ -116,6 +128,9 @@ def input_square(game: dict[str, any]) -> list[int]:
     :param game: dictionary of the played game
     :return: list of 2 values, of the next played cell in the game
     """
+    print(game)
+    if game['computer_mode'] and game['players'][game['turn']]=='computer':
+        return get_random_location(game)
     while True:
         location: str = input(
             f"enter row number,column number for {game['players'][game['turn']]}({game['turn']}) separated by ',':")
@@ -128,26 +143,24 @@ def input_square(game: dict[str, any]) -> list[int]:
         if not 0 <= location_list[0] < len(game['board']) or not 0 <= location_list[1] < len(game['board']):
             print("try again,out of range")
             continue
-        if game['board'][location_list[0]][location_list[1]] != '_':
+        if game['board'][location_list[0]][location_list[1]] != '_':#o(1)
             print("occupied,try again")
             continue
         break
 
     return location_list
 
+def get_random_location(game:dict[str, any]):
+    return choice(list(game['moves']))
 
 def set_square(game: dict[str, any], location: list[int]) -> None:
     """
     update the board with the received list and the current symbol turn
-
     :param game:dictionary of the played game
     :param location: a list of 2 integers
     """
     game['board'][location[0]][location[1]] = game['turn']
     game['moves'].discard(tuple(location))
-
-
-
 
 def check_win(game: dict[str, any]) -> bool:
     """
@@ -228,6 +241,7 @@ def play_tic_tac_toe() -> None:
         print("Let play Tic - Tac - Toe!!")
         my_game = init_game(3, my_game, is_rematch)
         get_players(my_game, is_rematch)
+        print(my_game)
         draw_board(my_game)
         while True:
             location = input_square(my_game)
