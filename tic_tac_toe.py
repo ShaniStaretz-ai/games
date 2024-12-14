@@ -15,8 +15,8 @@ def init_game(n: int, game: dict[str, any], is_rematch: bool) -> dict[str, any]:
             'turn': 'X',
             'players': {},
             "icons": ['X', 'O'],
-            "moves":possible_moves(n),
-            "computer_mode":False
+            "moves": possible_moves(n),
+            "computer_mode": False
 
         }
     return {
@@ -25,7 +25,7 @@ def init_game(n: int, game: dict[str, any], is_rematch: bool) -> dict[str, any]:
         'players': game['players'],
         "icons": ['X', 'O'],
         "moves": possible_moves(n),
-        "computer_mode": False
+        "computer_mode": True
     }
 
 
@@ -82,7 +82,7 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
             icon = get_player_icon(icons)
             players[f'{icon}'] = 'computer'
         game['players'] = players
-        game['computer_mode']=is_computer
+        game['computer_mode'] = is_computer
 
 
 def init_board(n: int) -> list[list[str]]:
@@ -93,21 +93,22 @@ def init_board(n: int) -> list[list[str]]:
     """
     return [['_'] * n for _ in range(1, n + 1)]
 
-def possible_moves(n: int) -> set[tuple[int,int]]:
+
+def possible_moves(n: int) -> set[tuple[int, int]]:
     """
     build and initiate the Tic - Tac - Toe possible moves
     :param n: diameter for the game's size nxn
     :return: a set of all possible moves by (row,col)
     """
-    moves:set[tuple[int,int]]=set()
-    for row in range(0, n ):
-        for col in range(0, n ):
-            moves.add((row,col))
+    moves: set[tuple[int, int]] = set()
+    for row in range(0, n):
+        for col in range(0, n):
+            moves.add((row, col))
 
     return moves
 
 
-def draw_board(game:dict[str, any]) -> None:
+def draw_board(game: dict[str, any]) -> None:
     """
     :param game: dictionary of the played game
     print the Tic Tac toe board
@@ -129,7 +130,7 @@ def input_square(game: dict[str, any]) -> list[int]:
     :return: list of 2 values, of the next played cell in the game
     """
     print(game)
-    if game['computer_mode'] and game['players'][game['turn']]=='computer':
+    if game['computer_mode'] and game['players'][game['turn']] == 'computer':
         return get_random_location(game)
     while True:
         location: str = input(
@@ -143,15 +144,17 @@ def input_square(game: dict[str, any]) -> list[int]:
         if not 0 <= location_list[0] < len(game['board']) or not 0 <= location_list[1] < len(game['board']):
             print("try again,out of range")
             continue
-        if game['board'][location_list[0]][location_list[1]] != '_':#o(1)
+        if game['board'][location_list[0]][location_list[1]] != '_':  # o(1)
             print("occupied,try again")
             continue
         break
 
     return location_list
 
-def get_random_location(game:dict[str, any]):
+
+def get_random_location(game: dict[str, any]):
     return choice(list(game['moves']))
+
 
 def set_square(game: dict[str, any], location: list[int]) -> None:
     """
@@ -161,6 +164,7 @@ def set_square(game: dict[str, any], location: list[int]) -> None:
     """
     game['board'][location[0]][location[1]] = game['turn']
     game['moves'].discard(tuple(location))
+
 
 def check_win(game: dict[str, any]) -> bool:
     """
@@ -218,7 +222,7 @@ def check_tie(game: dict[str, any]) -> bool:
     :param game:dictionary of the played game
     :return:True if there is a tie and the game is over, else return False
     """
-    return len(game['moves']) ==0
+    return len(game['moves']) == 0
 
 
 def switch_player(game: dict[str, any]) -> None:
@@ -233,14 +237,15 @@ def play_tic_tac_toe() -> None:
     """
     manage the tic-tac-toe game flow
     """
-    want_to_play = True;
+    new_game = True;
     is_rematch = False
     my_game: dict[str, any] = {}
 
-    while want_to_play or is_rematch:
+    while new_game or is_rematch:
         print("Let play Tic - Tac - Toe!!")
         my_game = init_game(3, my_game, is_rematch)
         get_players(my_game, is_rematch)
+        print(f"the {my_game['turn']} start first move")
         print(my_game)
         draw_board(my_game)
         while True:
@@ -254,12 +259,14 @@ def play_tic_tac_toe() -> None:
                 print("game over")
                 break
             switch_player(my_game)
-        want_to_play = True if input("do you want to play a new game?(y/n)").lower() == 'y' else False
-        if want_to_play:
-            is_rematch = False
+        is_rematch = True if input("do you want a rematch?(y/n)").lower() == 'y' else False
+
+        if is_rematch:
+            new_game = False
             continue
         else:
-            is_rematch = True if input("do you want a rematch?(y/n)").lower() == 'y' else False
+            new_game = True if input("do you want to play a new game?(y/n)").lower() == 'y' else False
+
 
     else:
         print("goodbye!")
