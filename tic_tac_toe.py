@@ -13,17 +13,17 @@ def init_game(n: int, game: dict[str, any], is_rematch: bool) -> dict[str, any]:
         return {
             'board': init_board(n),
             'turn': 'X',
-            'counter': 0,
             'players': {},
-            "icons": ['X', 'O']
+            "icons": ['X', 'O'],
+            "moves":possible_moves(n)
 
         }
     return {
         'board': init_board(n),
         'turn': 'X',
-        'counter': 0,
         'players': game['players'],
-        "icons": ['X', 'O']
+        "icons": ['X', 'O'],
+        "moves": possible_moves(n)
     }
 
 
@@ -69,7 +69,6 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
             print(f"you will play the {icon} symbol in this game")
             players[f'{icon}'] = name
             count += 1
-    print(players)
     game['players'] = players
 
 
@@ -79,7 +78,21 @@ def init_board(n: int) -> list[list[str]]:
     :param n: diameter for the game's size nxn
     :return: a nested list of string in size of nxn
     """
-    return [['_'] * n for row in range(1, n + 1)]
+
+    return [['_'] * n for _ in range(1, n + 1)]
+
+def possible_moves(n: int) -> set[tuple[int,int]]:
+    """
+    build and initiate the Tic - Tac - Toe possible moves
+    :param n: diameter for the game's size nxn
+    :return: a set of all possible moves by (row,col)
+    """
+    moves:set[tuple[int,int]]=set()
+    for row in range(0, n ):
+        for col in range(0, n ):
+            moves.add((row,col))
+
+    return moves
 
 
 def draw_board(game:dict[str, any]) -> None:
@@ -125,12 +138,15 @@ def input_square(game: dict[str, any]) -> list[int]:
 
 def set_square(game: dict[str, any], location: list[int]) -> None:
     """
+    update the board with the received list and the current symbol turn
+
     :param game:dictionary of the played game
     :param location: a list of 2 integers
-    update the board with the received list and the current symbol turn
     """
     game['board'][location[0]][location[1]] = game['turn']
-    game['counter'] += 1
+    game['moves'].discard(tuple(location))
+
+
 
 
 def check_win(game: dict[str, any]) -> bool:
@@ -189,7 +205,7 @@ def check_tie(game: dict[str, any]) -> bool:
     :param game:dictionary of the played game
     :return:True if there is a tie and the game is over, else return False
     """
-    return game['counter'] == len(game['board']) ** 2
+    return len(game['moves']) ==0
 
 
 def switch_player(game: dict[str, any]) -> None:
