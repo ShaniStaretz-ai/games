@@ -1,0 +1,2 @@
+import tic_tac_toe
+tic_tac_toe.play_tic_tac_toe()
