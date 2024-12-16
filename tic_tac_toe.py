@@ -1,3 +1,4 @@
+import re
 from random import choice
 
 
@@ -36,12 +37,12 @@ def get_player_icon(icons: list[str]) -> str:
     :return: the value of the selected icon
     """
     if len(icons) > 1:
-        is_select_icon = True if input("do you want to select symbol?(y/n)").lower() == 'y' else False
+        is_select_icon = get_valid_boolean_response("do you want to select symbol?(y/n)", ['y', 'n'], 'y')
         if is_select_icon:
             while True:
                 icon = input("select icon X/O:").upper()
                 if not icon in icons:
-                    print(f"invalid icon, the positions are: {'/'.join(icons)}")
+                    print(f"invalid icon, the possibilities are: {'/'.join(icons)}")
                     continue
                 break
         else:
@@ -51,6 +52,34 @@ def get_player_icon(icons: list[str]) -> str:
     else:
         icon = icons.pop()
     return icon
+
+
+def get_valid_boolean_response(message: str, options: list[str], true_option: str):
+    """
+
+    :param true_option: compared right answer
+    :param message:message to display in the input
+    :param options: list of options to answer from
+    :return: True if the selection is 'y', else return False
+    """
+    while True:
+        answer = input(message).lower()
+        if not answer in options:
+            print(f"invalid answer, the possibilities are: {'/'.join(options)}")
+            continue
+        break
+    return answer == true_option
+
+
+def get_valid_players_name(message: str) -> str:
+    while True:
+        name = input(message)
+        is_match = re.match("^(?!computer$)[a-zA-Z]+$", name)
+        if not is_match:
+            print("invalid name,must contain letters only,try again")
+            continue
+        break
+    return name.capitalize()
 
 
 def get_players(game: dict[str, any], is_rematch=False) -> None:
@@ -63,21 +92,20 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
     if not is_rematch:
         players = {}
         icons = game['icons'].copy()
-        is_computer = True if input("do you want to play against the computer?(y/n)").lower() == 'y' else False
+        is_computer = get_valid_boolean_response("do you want to play against the computer?(y/n)", ['y', 'n'], 'y')
+
         if not is_computer:
             count = 1
             while count < 3:
-                name = input(f"player #{count}, please enter your name:").capitalize()
-
+                name = get_valid_players_name(f"player #{count}, please enter your name:")
                 icon = get_player_icon(icons)
                 print(f"you will play the {icon} symbol in this game")
                 players[f'{icon}'] = name
                 count += 1
         else:
-            name = input(f"please enter your name:").capitalize()
-
+            name = get_valid_players_name("please enter your name:")
             icon = get_player_icon(icons)
-            print(f"you will play the {icon} symbol in this game")
+            print(f"you will play the '{icon}' symbol in this game")
             players[f'{icon}'] = name
             icon = get_player_icon(icons)
             players[f'{icon}'] = 'computer'
@@ -129,7 +157,6 @@ def input_square(game: dict[str, any]) -> list[int]:
     :param game: dictionary of the played game
     :return: list of 2 values, of the next played cell in the game
     """
-    print(game)
     if game['computer_mode'] and game['players'][game['turn']] == 'computer':
         return get_random_location(game)
     while True:
@@ -245,8 +272,7 @@ def play_tic_tac_toe() -> None:
         print("Let play Tic - Tac - Toe!!")
         my_game = init_game(3, my_game, is_rematch)
         get_players(my_game, is_rematch)
-        print(f"the {my_game['turn']} start first move")
-        print(my_game)
+        print(f"the {my_game['turn']} starts first move")
         draw_board(my_game)
         while True:
             location = input_square(my_game)
@@ -259,15 +285,13 @@ def play_tic_tac_toe() -> None:
                 print("game over")
                 break
             switch_player(my_game)
-        is_rematch = True if input("do you want a rematch?(y/n)").lower() == 'y' else False
+        is_rematch = get_valid_boolean_response("do you want a rematch?(y/n)", ['y', 'n'], 'y')
 
         if is_rematch:
             new_game = False
             continue
         else:
-            new_game = True if input("do you want to play a new game?(y/n)").lower() == 'y' else False
-
-
+            new_game = get_valid_boolean_response("do you want to play a new game?(y/n)", ['y', 'n'], 'y')
     else:
         print("goodbye!")
 
