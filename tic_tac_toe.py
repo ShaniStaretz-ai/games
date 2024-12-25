@@ -40,12 +40,12 @@ def get_player_icon(icons: tuple[str,str],selected_icon:str=None) -> str:
     icons_list=list(icons)
 
     if selected_icon is None:
-        is_select_icon = get_valid_boolean_response("do you want to select symbol (y/n)?", ('y', 'n'), 'y')
+        is_select_icon = get_valid_boolean_response("Do you want to select symbol (y/n)?", ('y', 'n'), 'y')
         if is_select_icon:
             while True:
-                icon = input("select icon X/O:").upper()
+                icon = input("Select icon X/O:").upper()
                 if not icon in icons_list:
-                    print(f"invalid icon, the possibilities are: {'/'.join(icons_list)}")
+                    print(f"Invalid icon, the possibilities are: {'/'.join(icons_list)}")
                     continue
                 break
         else:
@@ -67,7 +67,7 @@ def get_valid_boolean_response(message: str, options: tuple[str,str], true_optio
     while True:
         answer = input(message).lower()
         if not answer in options:
-            print(f"invalid answer, the possibilities are: {'/'.join(options)}")
+            print(f"Invalid answer, the possibilities are: {'/'.join(options)}")
             continue
         break
     return answer == true_option
@@ -83,7 +83,7 @@ def get_valid_player_name(message: str) -> str:
         name = input(message)
         is_match = re.match("^(?!computer$)[a-zA-Z]+$", name)
         if not is_match:
-            print("invalid name,must contain letters only,try again")
+            print("Invalid name,must contain letters only,try again")
             continue
         break
     return name.capitalize()
@@ -98,21 +98,21 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
     if not is_rematch:
         players = {}
         icons = game['icons']
-        is_computer = get_valid_boolean_response("do you want to play against the computer (y/n)?", ('y', 'n'), 'y')
+        is_computer = get_valid_boolean_response("Do you want to play against the computer (y/n)?", ('y', 'n'), 'y')
 
         if not is_computer:
             count = 1
             icon=None
             while count < 3:
-                name = get_valid_player_name(f"player #{count}, please enter your name:")
+                name = get_valid_player_name(f"Player #{count}, please enter your name:")
                 icon = get_player_icon(icons,icon)
-                print(f"you will play the {icon} symbol in this game")
+                print(f"You will play the {icon} symbol in this game")
                 players[f'{icon}'] = name
                 count += 1
         else:
-            name = get_valid_player_name("please enter your name:")
+            name = get_valid_player_name("Please enter your name:")
             icon = get_player_icon(icons)
-            print(f"you will play the '{icon}' symbol in this game")
+            print(f"You will play the '{icon}' symbol in this game")
             players[f'{icon}'] = name
             icon = get_player_icon(icons,icon)
             players[f'{icon}'] = 'computer'
@@ -170,18 +170,18 @@ def input_square(game: dict[str, any]) -> list[int]:
         return get_random_location(game)
     while True:
         location: str = input(
-            f"enter row number,column number for {game['players'][game['turn']]}({game['turn']}) separated by ',':")
+            f"Enter row number,column number for {game['players'][game['turn']]}({game['turn']}) separated by ',':")
         location_list = location.split(',')
         if len(location_list) < 2 or not all([x != '' for x in location_list]) or not all(
                 [x.isdigit() for x in location_list]):
-            print("try again,invalid input")
+            print("Try again,invalid input")
             continue
         location_list = [int(x) - 1 for x in location_list]
         if not 0 <= location_list[0] < len(game['board']) or not 0 <= location_list[1] < len(game['board']):
             print("try again,out of range")
             continue
         if game['board'][location_list[0]][location_list[1]] != '_':  # o(1)
-            print("occupied,try again")
+            print("Occupied,try again")
             continue
         break
 
@@ -285,26 +285,26 @@ def play_tic_tac_toe() -> None:
         print("Let play Tic - Tac - Toe!!")
         my_game = init_game(3, my_game, is_rematch)
         get_players(my_game, is_rematch)
-        print(f"the {my_game['turn']} starts first move")
+        print(f"The {my_game['turn']} starts first move")
         draw_board(my_game)
         while True:
             location = input_square(my_game)
             set_square(my_game, location)
             draw_board(my_game)
             if check_win(my_game):
-                print(f"the winner is:{my_game['players'][my_game['turn']]}!")
+                print(f"The winner is:{my_game['players'][my_game['turn']]}!")
                 break
             if check_tie(my_game):
-                print("game over")
+                print("Game over, no one won")
                 break
             switch_player(my_game)
-        is_rematch = get_valid_boolean_response("do you want a rematch (y/n) ?", ('y', 'n'), 'y')
+        is_rematch = get_valid_boolean_response("Do you want a rematch (y/n) ?", ('y', 'n'), 'y')
 
         if is_rematch:
             new_game = False
             continue
         else:
-            new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ('y', 'n'), 'y')
+            new_game = get_valid_boolean_response("Do you want to play a new game (y/n)?", ('y', 'n'), 'y')
     else:
         print("goodbye!")
 
