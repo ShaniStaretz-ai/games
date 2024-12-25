@@ -166,6 +166,7 @@ def input_square(game: dict[str, any]) -> list[int]:
     :return: list of 2 values, of the next played cell in the game
     """
     if game['computer_mode'] and game['players'][game['turn']] == 'computer':
+        print("The computer will play his turn now:")
         return get_random_location(game)
     while True:
         location: str = input(
