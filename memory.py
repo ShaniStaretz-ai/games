@@ -13,7 +13,8 @@ def init_game(cards_labels, rows_dimension) -> dict[str, any]:
         'rows_dimension': rows_dimension,
         'cols_dimension': cols_dimension,
         'players': {},
-        'computer_mode':False
+        'computer_mode': False,
+        "moves": possible_moves(rows_dimension, cols_dimension)
 
     }
 
@@ -26,30 +27,6 @@ def init_game(cards_labels, rows_dimension) -> dict[str, any]:
 #     "moves": possible_moves(n),
 #     "computer_mode": True
 # }
-
-
-def get_player_icon(icons: list[str]) -> str:
-    """
-    according to the user selection, we return the player's symbol for the game
-    :param icons: a list of possible icons
-    :return: the value of the selected icon
-    """
-    if len(icons) > 1:
-        is_select_icon = get_valid_boolean_response("do you want to select symbol (y/n)?", ['y', 'n'], 'y')
-        if is_select_icon:
-            while True:
-                icon = input("select icon X/O:").upper()
-                if not icon in icons:
-                    print(f"invalid icon, the possibilities are: {'/'.join(icons)}")
-                    continue
-                break
-        else:
-            icon = choice(icons)
-
-        icons.remove(icon)
-    else:
-        icon = icons.pop()
-    return icon
 
 
 def get_valid_boolean_response(message: str, options: list[str], true_option: str):
@@ -128,19 +105,19 @@ def init_cards(card_labels=('A', 'B', 'C', 'D', 'E', 'F')) -> list[dict[str, any
         }
         cards.append(card)
     random.shuffle(cards)
-    print(cards)
     return cards
 
 
-def possible_moves(n: int) -> set[tuple[int, int]]:
+def possible_moves(rows_dimension: int, cols_dimension: int) -> set[tuple[int, int]]:
     """
-    build and initiate the Tic - Tac - Toe possible moves
-    :param n: diameter for the game's size nxn
+    build and initiate the memory possible moves
+    :param rows_dimension: diameter for the game's row number
+    :param cols_dimension: diameter for the game's column number
     :return: a set of all possible moves by (row,col)
     """
     moves: set[tuple[int, int]] = set()
-    for row in range(0, n):
-        for col in range(0, n):
+    for row in range(0, rows_dimension):
+        for col in range(0, cols_dimension):
             moves.add((row, col))
 
     return moves
@@ -149,7 +126,7 @@ def possible_moves(n: int) -> set[tuple[int, int]]:
 def draw_board(game: dict[str, any]) -> None:
     """
     :param game: dictionary of the played game
-    print the Tic Tac toe board
+    print the memory board
     """
     print("---------------------------")
     print(' ', end=' ')
@@ -176,11 +153,12 @@ def input_card_location(game: dict[str, any]) -> tuple[int, int]:
     :param game: dictionary of the played game
     :return: list of 2 values, of the next played cell in the game
     """
-    # if game['computer_mode'] and game['players'][game['turn']] == '2':
-    #     return get_random_location(game)
+    if game['computer_mode'] and game['turn'] == '2':
+        print("The computer turn NOW")
+        return get_random_location(game)
     while True:
         location: str = input(
-            f"player #{game['turn']}, enter row number,column number for  separated by ',':")
+            f"player #{game['turn']}, {game['players'][game['turn']]['name']}, enter row number,column number for  separated by ',':")
         location_list = location.split(',')
         if len(location_list) < 2 or not all([x != '' for x in location_list]) or not all(
                 [x.isdigit() for x in location_list]):
@@ -195,8 +173,6 @@ def input_card_location(game: dict[str, any]) -> tuple[int, int]:
             print("already flipped,try again")
             continue
         break
-    print(tuple(location_list))
-    print(len(tuple(location_list)))
     return tuple(location_list)
 
 
@@ -229,7 +205,7 @@ def check_match(game, location1: tuple[int, int], location2: tuple[int, int]) ->
     return game['board'][location1]['id'] == game['board'][location2]['id']
 
 
-def check_tie(game: dict[str, any]) -> bool:
+def check_end_of_game(game: dict[str, any]) -> bool:
     """
     :param game:dictionary of the played game
     :return:True if there is a tie and the game is over, else return False
@@ -237,7 +213,7 @@ def check_tie(game: dict[str, any]) -> bool:
     return len(game['moves']) == 0
 
 
-def switch_player( game: dict[str, any]) -> None:
+def switch_player(game: dict[str, any]) -> None:
     """
     switch the current player and update the game
     :param game:dictionary of the played game
@@ -245,11 +221,16 @@ def switch_player( game: dict[str, any]) -> None:
     if game['computer_mode']:
         game['turn'] = '1' if game['turn'] == '2' else '2'
     else:
-        current_player=int(game['turn'])
-        if int(current_player)<len(game['players'].keys()):
-            game['turn']=str(current_player+1)
+        current_player = int(game['turn'])
+        if int(current_player) < len(game['players'].keys()):
+            game['turn'] = str(current_player + 1)
         else:
-            game['turn']='1'
+            game['turn'] = '1'
+
+
+def get_winner(my_game):
+    maxp = max(my_game['players'].values(), key=lambda player: player['score'])
+    return maxp
 
 
 def play_memory_game() -> None:
@@ -266,9 +247,9 @@ def play_memory_game() -> None:
 
         my_game = init_game(card_labels, 4)
         get_players(my_game, is_rematch)
+
         while True:
             draw_board(my_game)
-            print(my_game)
             location1 = input_card_location(my_game)
             flip_card(my_game, location1)
             draw_board(my_game)
@@ -278,11 +259,21 @@ def play_memory_game() -> None:
             if check_match(my_game, location1, location2):
                 print("MATCH")
                 set_match(my_game, location1, location2)
+                if check_end_of_game(my_game):
+                    winner = get_winner(my_game)
+                    print("the winner is: ", winner['name'])
+                    break;
             else:
                 print("NO MATCH")
                 flip_card(my_game, location1)
                 flip_card(my_game, location2)
                 switch_player(my_game)
+        is_rematch = get_valid_boolean_response("do you want a rematch (y/n) ?", ['y', 'n'], 'y')
+        if is_rematch:
+            new_game = False
+            continue
+        else:
+            new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ['y', 'n'], 'y')
 
         # my_game = init_game(3, my_game, is_rematch)
     #     get_players(my_game, is_rematch)
@@ -306,8 +297,8 @@ def play_memory_game() -> None:
     #         continue
     #     else:
     #         new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ['y', 'n'], 'y')
-    # else:
-    #     print("goodbye!")
+    else:
+        print("goodbye!")
 
 
 def init_board(cards, rows_num):
@@ -323,7 +314,9 @@ def init_board(cards, rows_num):
 def set_match(my_game, location1, location2):
     my_game['board'][location1]['is_matched'] = True
     my_game['board'][location2]['is_matched'] = True
-    my_game['players'][my_game['turn']]['score']+=1
+    my_game['players'][my_game['turn']]['score'] += 1
+    my_game['moves'].discard(location1)
+    my_game['moves'].discard(location2)
 
 
 if __name__ == "__main__":
