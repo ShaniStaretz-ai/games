@@ -3,30 +3,37 @@ import re
 from random import choice
 
 
-def init_game(cards_labels, rows_dimension) -> dict[str, any]:
+def init_game(game, is_rematch: bool, cards_labels: tuple[str, str, str, str, str, str], rows_dimension: int) -> dict[
+    str, any]:
     cards = init_cards(cards_labels)
     cols_dimension = int(len(cards) / rows_dimension)
-    # if not is_rematch:
-    return {
-        'board': init_board(cards, rows_dimension),
-        'turn': '1',
-        'rows_dimension': rows_dimension,
-        'cols_dimension': cols_dimension,
-        'players': {},
-        'computer_mode': False,
-        "moves": possible_moves(rows_dimension, cols_dimension)
+    if not is_rematch:
+        return {
+            'board': init_board(cards, rows_dimension),
+            'turn': '1',
+            'rows_dimension': rows_dimension,
+            'cols_dimension': cols_dimension,
+            'players': {},
+            'computer_mode': False,
+            "moves": possible_moves(rows_dimension, cols_dimension)
 
-    }
+        }
+    else:
+        return {
+            'board': init_board(cards, rows_dimension),
+            'turn': '1',
+            'rows_dimension': rows_dimension,
+            'cols_dimension': cols_dimension,
+            'players': reset_players_score(game['players']),
+            'computer_mode': game['computer_mode'],
+            "moves": possible_moves(rows_dimension, cols_dimension)
 
-
-# return {
-#     'board': init_cards(n),
-#     'turn': 'X',
-#     'players': game['players'],
-#     "icons": ['X', 'O'],
-#     "moves": possible_moves(n),
-#     "computer_mode": True
-# }
+        }
+def reset_players_score(players):
+    print(players)
+    for key in players:
+        players[key]['score']=0
+    return players
 
 
 def get_valid_boolean_response(message: str, options: list[str], true_option: str):
@@ -130,7 +137,7 @@ def draw_board(game: dict[str, any]) -> None:
     """
     print("---------------------------")
     print(' ', end=' ')
-    for i in range(1, game['rows_dimension']):
+    for i in range(1, game['cols_dimension'] + 1):
         print(i, end=" ")
     print()
     board = game['board']
@@ -169,7 +176,7 @@ def input_card_location(game: dict[str, any]) -> tuple[int, int]:
             print("try again,out of range")
             continue
         card = game['board'][tuple(location_list)]
-        if card['is_flipped']:  # o(1)
+        if card['is_flipped']:
             print("already flipped,try again")
             continue
         break
@@ -191,6 +198,10 @@ def flip_card(game: dict[str, any], location) -> None:
     :param location: a list of 2 integers
     """
     game['board'][location]['is_flipped'] = not game['board'][location]['is_flipped']
+    if game['board'][location]['is_flipped']:
+        game['moves'].discard(location)
+    else:
+        game['moves'].add(location)
 
 
 def check_match(game, location1: tuple[int, int], location2: tuple[int, int]) -> bool:
@@ -243,9 +254,9 @@ def play_memory_game() -> None:
 
     while new_game or is_rematch:
         print("Let play Memory game!!")
-        card_labels = ('A', 'B', 'C', 'D', 'E', 'F')
+        card_labels = ('A', 'B')
 
-        my_game = init_game(card_labels, 4)
+        my_game = init_game(my_game, is_rematch, card_labels, 2)
         get_players(my_game, is_rematch)
 
         while True:
@@ -261,7 +272,7 @@ def play_memory_game() -> None:
                 set_match(my_game, location1, location2)
                 if check_end_of_game(my_game):
                     winner = get_winner(my_game)
-                    print("the winner is: ", winner['name'])
+                    print(f"the winner is: {winner['name']} with the score {winner['score']}")
                     break;
             else:
                 print("NO MATCH")
