@@ -29,10 +29,12 @@ def init_game(game, is_rematch: bool, cards_labels: tuple[str, str, str, str, st
             "moves": possible_moves(rows_dimension, cols_dimension)
 
         }
+
+
 def reset_players_score(players):
     print(players)
     for key in players:
-        players[key]['score']=0
+        players[key]['score'] = 0
     return players
 
 
@@ -51,6 +53,18 @@ def get_valid_boolean_response(message: str, options: list[str], true_option: st
             continue
         break
     return answer == true_option
+
+
+def get_valid_number_of_players():
+    while True:
+        try:
+            num_of_players = int(input("how many players are you?"))
+            if num_of_players < 2:
+                raise ValueError
+            return num_of_players
+        except ValueError:
+            print("you must enter a valid number of players")
+            continue
 
 
 def get_valid_player_name(message: str) -> str:
@@ -82,7 +96,8 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
 
         if not is_computer:
             count = 1
-            num_of_players = int(input("how many players are you?"))
+
+            num_of_players = get_valid_number_of_players()
             while count <= num_of_players:
                 name = get_valid_player_name(f"player #{count}, please enter your name:")
 
