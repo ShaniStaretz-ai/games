@@ -167,7 +167,7 @@ def draw_board(game: dict[str, any]) -> None:
             print()
 
 
-def input_card_location(game: dict[str, any]) -> tuple[int, int]:
+def input_card_location(game: dict[str, any]) -> tuple[int, int]|str:
     """
     get from the user cell location and validate its values:
     check the location limit within the game
@@ -179,8 +179,15 @@ def input_card_location(game: dict[str, any]) -> tuple[int, int]:
         print("The computer turn NOW")
         return get_random_location(game)
     while True:
+        print("enter row number,column number for  separated by ','")
+        print("if you want to restart the game from scratch, press r")
+        print("if you want to restart the game with the same players, press m")
         location: str = input(
-            f"player #{game['turn']}, {game['players'][game['turn']]['name']}, enter row number,column number for  separated by ',':")
+            f"player #{game['turn']}, {game['players'][game['turn']]['name']}, your turn:")
+        if location.upper()=='R':
+            return 'R'
+        elif location.upper()=='M':
+            return 'M'
         location_list = location.split(',')
         if len(location_list) < 2 or not all([x != '' for x in location_list]) or not all(
                 [x.isdigit() for x in location_list]):
@@ -259,27 +266,59 @@ def get_winner(my_game):
     return maxp
 
 
+def init_board(cards, rows_num):
+    cols_num = len(cards) // rows_num
+    board = {}
+    for row in range(rows_num):
+        for col in range(cols_num):
+            board[(row, col)] = cards.pop();
+
+    return board
+
+
+def set_match(my_game, location1, location2):
+    my_game['board'][location1]['is_matched'] = True
+    my_game['board'][location2]['is_matched'] = True
+    my_game['players'][my_game['turn']]['score'] += 1
+    my_game['moves'].discard(location1)
+    my_game['moves'].discard(location2)
+
+
+
 def play_memory_game() -> None:
     """
     manage the tic-tac-toe game flow
     """
     new_game = True;
-    is_rematch = False
+    is_rematch = None
     my_game: dict[str, any] = {}
 
-    while new_game or is_rematch:
+    while new_game  or is_rematch:
+        new_game=None
         print("Let play Memory game!!")
-        card_labels = ('A', 'B')
+        card_labels = ('A', 'B','C','D','E','F')
 
-        my_game = init_game(my_game, is_rematch, card_labels, 2)
+        my_game = init_game(my_game, is_rematch, card_labels, 4)
         get_players(my_game, is_rematch)
 
         while True:
             draw_board(my_game)
             location1 = input_card_location(my_game)
+            if location1=='M':
+                is_rematch=True
+                break
+            elif location1 == 'R':
+                new_game = True
+                break
             flip_card(my_game, location1)
             draw_board(my_game)
             location2 = input_card_location(my_game)
+            if location2 == 'M':
+                is_rematch = True
+                break
+            elif location2 == 'R':
+                new_game = True
+                break
             flip_card(my_game, location2)
             draw_board(my_game)
             if check_match(my_game, location1, location2):
@@ -294,12 +333,14 @@ def play_memory_game() -> None:
                 flip_card(my_game, location1)
                 flip_card(my_game, location2)
                 switch_player(my_game)
-        is_rematch = get_valid_boolean_response("do you want a rematch (y/n) ?", ['y', 'n'], 'y')
+        if is_rematch is None and new_game is None:
+            is_rematch = get_valid_boolean_response("do you want a rematch (y/n) ?", ['y', 'n'], 'y')
         if is_rematch:
             new_game = False
             continue
         else:
-            new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ['y', 'n'], 'y')
+            if new_game is None:
+                new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ['y', 'n'], 'y')
 
         # my_game = init_game(3, my_game, is_rematch)
     #     get_players(my_game, is_rematch)
@@ -325,24 +366,6 @@ def play_memory_game() -> None:
     #         new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ['y', 'n'], 'y')
     else:
         print("goodbye!")
-
-
-def init_board(cards, rows_num):
-    cols_num = len(cards) // rows_num
-    board = {}
-    for row in range(rows_num):
-        for col in range(cols_num):
-            board[(row, col)] = cards.pop();
-
-    return board
-
-
-def set_match(my_game, location1, location2):
-    my_game['board'][location1]['is_matched'] = True
-    my_game['board'][location2]['is_matched'] = True
-    my_game['players'][my_game['turn']]['score'] += 1
-    my_game['moves'].discard(location1)
-    my_game['moves'].discard(location2)
 
 
 if __name__ == "__main__":
