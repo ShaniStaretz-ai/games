@@ -2,6 +2,8 @@ import random
 import re
 from random import choice
 
+RESTART_SENTINEL= 'R'
+REMATCH_SENTINEL= 'M'
 
 def init_game(game, is_rematch: bool, cards_labels: tuple[str, str, str, str, str, str], rows_dimension: int) -> dict[
     str, any]:
@@ -32,7 +34,6 @@ def init_game(game, is_rematch: bool, cards_labels: tuple[str, str, str, str, st
 
 
 def reset_players_score(players):
-    print(players)
     for key in players:
         players[key]['score'] = 0
     return players
@@ -113,7 +114,8 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
             players['2'] = {"name": 'computer', "score": 0}
         game['players'] = players
         game['computer_mode'] = is_computer
-
+        names=map(lambda player: player['name'],players.values())
+        print("the players are: ",' VS '.join(names))
 
 def init_cards(card_labels=('A', 'B', 'C', 'D', 'E', 'F')) -> list[dict[str, any]]:
     cards = []
@@ -179,15 +181,15 @@ def input_card_location(game: dict[str, any]) -> tuple[int, int]|str:
         print("The computer turn NOW")
         return get_random_location(game)
     while True:
-        print("enter row number,column number for  separated by ','")
-        print("if you want to restart the game from scratch, press r")
-        print("if you want to restart the game with the same players, press m")
+        print("enter row number,column number separated by ','")
+        print(f"if you want to restart the game from scratch, press {RESTART_SENTINEL.lower()}/{RESTART_SENTINEL}")
+        print(f"if you want to restart the game with the same players, press {REMATCH_SENTINEL.lower()}/{REMATCH_SENTINEL}")
         location: str = input(
             f"player #{game['turn']}, {game['players'][game['turn']]['name']}, your turn:")
-        if location.upper()=='R':
-            return 'R'
-        elif location.upper()=='M':
-            return 'M'
+        if location.upper()==RESTART_SENTINEL:
+            return RESTART_SENTINEL
+        elif location.upper()==REMATCH_SENTINEL:
+            return REMATCH_SENTINEL
         location_list = location.split(',')
         if len(location_list) < 2 or not all([x != '' for x in location_list]) or not all(
                 [x.isdigit() for x in location_list]):
@@ -304,19 +306,19 @@ def play_memory_game() -> None:
         while True:
             draw_board(my_game)
             location1 = input_card_location(my_game)
-            if location1=='M':
+            if location1==REMATCH_SENTINEL:
                 is_rematch=True
                 break
-            elif location1 == 'R':
+            elif location1 == RESTART_SENTINEL:
                 new_game = True
                 break
             flip_card(my_game, location1)
             draw_board(my_game)
             location2 = input_card_location(my_game)
-            if location2 == 'M':
+            if location2 == REMATCH_SENTINEL:
                 is_rematch = True
                 break
-            elif location2 == 'R':
+            elif location2 == RESTART_SENTINEL:
                 new_game = True
                 break
             flip_card(my_game, location2)
