@@ -2,8 +2,9 @@ import random
 import re
 from random import choice
 
-RESTART_SENTINEL= 'R'
-REMATCH_SENTINEL= 'M'
+RESTART_SENTINEL = 'R'
+REMATCH_SENTINEL = 'M'
+
 
 def init_game(game, is_rematch: bool, cards_labels: tuple[str, str, str, str, str, str], rows_dimension: int) -> dict[
     str, any]:
@@ -114,8 +115,9 @@ def get_players(game: dict[str, any], is_rematch=False) -> None:
             players['2'] = {"name": 'computer', "score": 0}
         game['players'] = players
         game['computer_mode'] = is_computer
-        names=map(lambda player: player['name'],players.values())
-        print("the players are: ",' VS '.join(names))
+        names = map(lambda player: player['name'], players.values())
+        print("the players are: ", ' VS '.join(names))
+
 
 def init_cards(card_labels=('A', 'B', 'C', 'D', 'E', 'F')) -> list[dict[str, any]]:
     cards = []
@@ -169,7 +171,7 @@ def draw_board(game: dict[str, any]) -> None:
             print()
 
 
-def input_card_location(game: dict[str, any]) -> tuple[int, int]|str:
+def input_card_location(game: dict[str, any]) -> tuple[int, int] | str:
     """
     get from the user cell location and validate its values:
     check the location limit within the game
@@ -183,12 +185,13 @@ def input_card_location(game: dict[str, any]) -> tuple[int, int]|str:
     while True:
         print("enter row number,column number separated by ','")
         print(f"if you want to restart the game from scratch, press {RESTART_SENTINEL.lower()}/{RESTART_SENTINEL}")
-        print(f"if you want to restart the game with the same players, press {REMATCH_SENTINEL.lower()}/{REMATCH_SENTINEL}")
+        print(
+            f"if you want to restart the game with the same players, press {REMATCH_SENTINEL.lower()}/{REMATCH_SENTINEL}")
         location: str = input(
             f"player #{game['turn']}, {game['players'][game['turn']]['name']}, your turn:")
-        if location.upper()==RESTART_SENTINEL:
+        if location.upper() == RESTART_SENTINEL:
             return RESTART_SENTINEL
-        elif location.upper()==REMATCH_SENTINEL:
+        elif location.upper() == REMATCH_SENTINEL:
             return REMATCH_SENTINEL
         location_list = location.split(',')
         if len(location_list) < 2 or not all([x != '' for x in location_list]) or not all(
@@ -286,6 +289,15 @@ def set_match(my_game, location1, location2):
     my_game['moves'].discard(location2)
 
 
+def print_score_board(winner, my_game):
+    other_scores = filter(lambda player: player['score'] != winner['score'], my_game['players'].values())
+    print(f"the winner is: {winner['name']} with the score {winner['score']}:")
+    print("SCORE BOARD:")
+    print(f" name | score")
+    print(f"{winner['name']} | {winner['score']}")
+    for player in other_scores:
+        print(f"{player['name']} | {player['score']}")
+
 
 def play_memory_game() -> None:
     """
@@ -295,19 +307,19 @@ def play_memory_game() -> None:
     is_rematch = None
     my_game: dict[str, any] = {}
 
-    while new_game  or is_rematch:
-        new_game=None
+    while new_game or is_rematch:
+        new_game = None
         print("Let play Memory game!!")
-        card_labels = ('A', 'B','C','D','E','F')
+        card_labels = ('A', 'B')
 
-        my_game = init_game(my_game, is_rematch, card_labels, 4)
+        my_game = init_game(my_game, is_rematch, card_labels, len(card_labels))
         get_players(my_game, is_rematch)
 
         while True:
             draw_board(my_game)
             location1 = input_card_location(my_game)
-            if location1==REMATCH_SENTINEL:
-                is_rematch=True
+            if location1 == REMATCH_SENTINEL:
+                is_rematch = True
                 break
             elif location1 == RESTART_SENTINEL:
                 new_game = True
@@ -328,7 +340,7 @@ def play_memory_game() -> None:
                 set_match(my_game, location1, location2)
                 if check_end_of_game(my_game):
                     winner = get_winner(my_game)
-                    print(f"the winner is: {winner['name']} with the score {winner['score']}")
+                    print_score_board(winner, my_game)
                     break;
             else:
                 print("NO MATCH")
@@ -343,29 +355,6 @@ def play_memory_game() -> None:
         else:
             if new_game is None:
                 new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ['y', 'n'], 'y')
-
-        # my_game = init_game(3, my_game, is_rematch)
-    #     get_players(my_game, is_rematch)
-    #     print(f"the {my_game['turn']} starts first move")
-    #     draw_board(my_game)
-    #     while True:
-    #         location = input_card_location(my_game)
-    #         flip_card(my_game, location)
-    #         draw_board(my_game)
-    #         if check_match(my_game):
-    #             print(f"the winner is:{my_game['players'][my_game['turn']]}!")
-    #             break
-    #         if check_tie(my_game):
-    #             print("game over")
-    #             break
-    #         switch_player(my_game)
-    #     is_rematch = get_valid_boolean_response("do you want a rematch (y/n) ?", ['y', 'n'], 'y')
-    #
-    #     if is_rematch:
-    #         new_game = False
-    #         continue
-    #     else:
-    #         new_game = get_valid_boolean_response("do you want to play a new game (y/n)?", ['y', 'n'], 'y')
     else:
         print("goodbye!")
 
